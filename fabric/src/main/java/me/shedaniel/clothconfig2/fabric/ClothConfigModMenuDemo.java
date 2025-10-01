@@ -25,13 +25,14 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.example.ExampleConfig;
 import me.shedaniel.clothconfig2.ClothConfigDemo;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 
 public class ClothConfigModMenuDemo implements ModMenuApi {
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
         return screen -> {
-            if (RenderSystem.isOnRenderThread() && Screen.hasShiftDown()) return AutoConfig.getConfigScreen(ExampleConfig.class, screen).get();
+            if (RenderSystem.isOnRenderThread() && Minecraft.getInstance().hasShiftDown()) return AutoConfig.getConfigScreen(ExampleConfig.class, screen).get();
             return ClothConfigDemo.getConfigBuilderWithDemo().setParentScreen(screen).build();
         };
     }

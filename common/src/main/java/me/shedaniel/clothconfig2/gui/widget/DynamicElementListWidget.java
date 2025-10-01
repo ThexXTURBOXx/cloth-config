@@ -32,6 +32,9 @@ import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenAxis;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -209,18 +212,18 @@ public abstract class DynamicElementListWidget<E extends DynamicElementListWidge
             List<? extends NarratableEntry> list = this.narratables();
             Screen.NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(list, this.lastNarratable);
             if (narratableSearchResult != null) {
-                if (narratableSearchResult.priority.isTerminal()) {
-                    this.lastNarratable = narratableSearchResult.entry;
+                if (narratableSearchResult.priority().isTerminal()) {
+                    this.lastNarratable = narratableSearchResult.entry();
                 }
                 
                 if (list.size() > 1) {
-                    narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.object_list", narratableSearchResult.index + 1, list.size()));
-                    if (narratableSearchResult.priority == NarrationPriority.FOCUSED) {
+                    narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.object_list", narratableSearchResult.index() + 1, list.size()));
+                    if (narratableSearchResult.priority() == NarrationPriority.FOCUSED) {
                         narrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.component_list.usage"));
                     }
                 }
                 
-                narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());
+                narratableSearchResult.entry().updateNarration(narrationElementOutput.nest());
             }
             
         }
@@ -240,27 +243,27 @@ public abstract class DynamicElementListWidget<E extends DynamicElementListWidge
         }
         
         @Override
-        public boolean mouseClicked(double d, double e, int i) {
+        public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
             if (!isEnabled()) {
                 return false;
             }
-            return ContainerEventHandler.super.mouseClicked(d, e, i);
+            return ContainerEventHandler.super.mouseClicked(mouseButtonEvent, bl);
         }
         
         @Override
-        public boolean mouseReleased(double d, double e, int i) {
+        public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
             if (!isEnabled()) {
                 return false;
             }
-            return ContainerEventHandler.super.mouseReleased(d, e, i);
+            return ContainerEventHandler.super.mouseReleased(mouseButtonEvent);
         }
         
         @Override
-        public boolean mouseDragged(double d, double e, int i, double f, double g) {
+        public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double deltaX, double deltaY) {
             if (!isEnabled()) {
                 return false;
             }
-            return ContainerEventHandler.super.mouseDragged(d, e, i, f, g);
+            return ContainerEventHandler.super.mouseDragged(mouseButtonEvent, deltaX, deltaY);
         }
         
         @Override
@@ -272,27 +275,27 @@ public abstract class DynamicElementListWidget<E extends DynamicElementListWidge
         }
         
         @Override
-        public boolean keyPressed(int i, int j, int k) {
+        public boolean keyPressed(KeyEvent keyEvent) {
             if (!isEnabled()) {
                 return false;
             }
-            return ContainerEventHandler.super.keyPressed(i, j, k);
+            return ContainerEventHandler.super.keyPressed(keyEvent);
         }
         
         @Override
-        public boolean keyReleased(int i, int j, int k) {
+        public boolean keyReleased(KeyEvent keyEvent) {
             if (!isEnabled()) {
                 return false;
             }
-            return ContainerEventHandler.super.keyReleased(i, j, k);
+            return ContainerEventHandler.super.keyReleased(keyEvent);
         }
         
         @Override
-        public boolean charTyped(char c, int i) {
+        public boolean charTyped(CharacterEvent characterEvent) {
             if (!isEnabled()) {
                 return false;
             }
-            return ContainerEventHandler.super.charTyped(c, i);
+            return ContainerEventHandler.super.charTyped(characterEvent);
         }
     }
 }

@@ -42,6 +42,8 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -375,28 +377,29 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
         return (int) this.getScroll() - this.height - this.headerHeight;
     }
     
-    protected void updateScrollingState(double double_1, double double_2, int int_1) {
-        this.scrolling = int_1 == 0 && double_1 >= (double) this.getScrollbarPosition() && double_1 < (double) (this.getScrollbarPosition() + 6);
+    protected void updateScrollingState(MouseButtonEvent mouseButtonEvent) {
+        this.scrolling = mouseButtonEvent.button() == 0 && mouseButtonEvent.x() >= (double) this.getScrollbarPosition() && mouseButtonEvent.x() < (double) (this.getScrollbarPosition() + 6);
     }
     
     protected int getScrollbarPosition() {
         return this.width / 2 + 124;
     }
     
-    public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        this.updateScrollingState(double_1, double_2, int_1);
-        if (!this.isMouseOver(double_1, double_2)) {
+    @Override
+    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
+        this.updateScrollingState(mouseButtonEvent);
+        if (!this.isMouseOver(mouseButtonEvent.x(), mouseButtonEvent.y())) {
             return false;
         } else {
-            E item = this.getItemAtPosition(double_1, double_2);
+            E item = this.getItemAtPosition(mouseButtonEvent.x(), mouseButtonEvent.y());
             if (item != null) {
-                if (item.mouseClicked(double_1, double_2, int_1)) {
+                if (item.mouseClicked(mouseButtonEvent, bl)) {
                     this.setFocused(item);
                     this.setDragging(true);
                     return true;
                 }
-            } else if (int_1 == 0) {
-                this.clickedHeader((int) (double_1 - (double) (this.left + this.width / 2 - this.getItemWidth() / 2)), (int) (double_2 - (double) this.top) + (int) this.getScroll() - 4);
+            } else if (mouseButtonEvent.button() == 0) {
+                this.clickedHeader((int) (mouseButtonEvent.x() - (double) (this.left + this.width / 2 - this.getItemWidth() / 2)), (int) (mouseButtonEvent.y() - (double) this.top) + (int) this.getScroll() - 4);
                 return true;
             }
             
@@ -459,21 +462,23 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
         return null;
     }
     
-    public boolean mouseReleased(double double_1, double double_2, int int_1) {
+    @Override
+    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
         if (this.getFocused() != null) {
-            this.getFocused().mouseReleased(double_1, double_2, int_1);
+            this.getFocused().mouseReleased(mouseButtonEvent);
         }
         
         return false;
     }
     
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
+    @Override
+    public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double deltaX, double deltaY) {
+        if (super.mouseDragged(mouseButtonEvent, deltaX, deltaY)) {
             return true;
-        } else if (button == 0 && this.scrolling) {
-            if (mouseY < (double) this.top) {
+        } else if (mouseButtonEvent.button() == 0 && this.scrolling) {
+            if (mouseButtonEvent.y() < (double) this.top) {
                 this.capYPosition(0.0F);
-            } else if (mouseY > (double) this.bottom) {
+            } else if (mouseButtonEvent.y() > (double) this.bottom) {
                 this.capYPosition(this.getMaxScroll());
             } else {
                 double double_5 = Math.max(1, this.getMaxScroll());
@@ -489,6 +494,7 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
         }
     }
     
+    @Override
     public boolean mouseScrolled(double double_1, double double_2, double amountX, double amountY) {
         for (E entry : visibleChildren()) {
             if (entry.mouseScrolled(double_1, double_2, amountX, amountY)) {
@@ -499,13 +505,14 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
         return amountY != 0;
     }
     
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (super.keyPressed(int_1, int_2, int_3)) {
+    @Override
+    public boolean keyPressed(KeyEvent keyEvent) {
+        if (super.keyPressed(keyEvent)) {
             return true;
-        } else if (int_1 == 264) {
+        } else if (keyEvent.key() == 264) {
             this.moveSelection(1);
             return true;
-        } else if (int_1 == 265) {
+        } else if (keyEvent.key() == 265) {
             this.moveSelection(-1);
             return true;
         } else {
@@ -698,18 +705,18 @@ public abstract class DynamicEntryListWidget<E extends DynamicEntryListWidget.En
             List<? extends NarratableEntry> list = this.narratables();
             Screen.NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(list, this.lastNarratable);
             if (narratableSearchResult != null) {
-                if (narratableSearchResult.priority.isTerminal()) {
-                    this.lastNarratable = narratableSearchResult.entry;
+                if (narratableSearchResult.priority().isTerminal()) {
+                    this.lastNarratable = narratableSearchResult.entry();
                 }
                 
                 if (list.size() > 1) {
-                    narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.object_list", narratableSearchResult.index + 1, list.size()));
-                    if (narratableSearchResult.priority == NarrationPriority.FOCUSED) {
+                    narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.object_list", narratableSearchResult.index() + 1, list.size()));
+                    if (narratableSearchResult.priority() == NarrationPriority.FOCUSED) {
                         narrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.component_list.usage"));
                     }
                 }
                 
-                narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());
+                narratableSearchResult.entry().updateNarration(narrationElementOutput.nest());
             }
             
         }

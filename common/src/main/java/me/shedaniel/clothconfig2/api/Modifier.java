@@ -21,7 +21,7 @@ package me.shedaniel.clothconfig2.api;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.Minecraft;
 
 import java.util.Objects;
 
@@ -67,7 +67,8 @@ public class Modifier {
     }
     
     public static Modifier current() {
-        return Modifier.of(Screen.hasAltDown(), Screen.hasControlDown(), Screen.hasShiftDown());
+        Minecraft mc = Minecraft.getInstance();
+        return Modifier.of(mc.hasAltDown(), mc.hasControlDown(), mc.hasShiftDown());
     }
     
     private static short setFlag(short base, short flag, boolean val) {

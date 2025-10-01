@@ -38,6 +38,9 @@ import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -232,9 +235,9 @@ public class DropdownBoxEntry<T> extends TooltipListEntry<T> {
         }
         
         @Override
-        public boolean mouseClicked(double double_1, double double_2, int int_1) {
+        public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
             dontReFocus = false;
-            boolean b = super.mouseClicked(double_1, double_2, int_1);
+            boolean b = super.mouseClicked(mouseButtonEvent, bl);
             if (dontReFocus) {
                 setFocused(null);
                 dontReFocus = false;
@@ -462,20 +465,20 @@ public class DropdownBoxEntry<T> extends TooltipListEntry<T> {
         }
         
         @Override
-        public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
+        public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double deltaX, double deltaY) {
             if (!isExpanded())
                 return false;
-            if (int_1 == 0 && this.scrolling) {
-                if (double_2 < (double) lastRectangle.y + lastRectangle.height) {
+            if (mouseButtonEvent.button() == 0 && this.scrolling) {
+                if (mouseButtonEvent.y() < (double) lastRectangle.y + lastRectangle.height) {
                     scrollTo(0, false);
-                } else if (double_2 > (double) lastRectangle.y + lastRectangle.height + getHeight()) {
+                } else if (mouseButtonEvent.y() > (double) lastRectangle.y + lastRectangle.height + getHeight()) {
                     scrollTo(getMaxScrollPosition(), false);
                 } else {
                     double double_5 = Math.max(1, this.getMaxScrollPosition());
                     int int_2 = getHeight();
                     int int_3 = Mth.clamp((int) ((float) (int_2 * int_2) / (float) this.getMaxScrollPosition()), 32, int_2 - 8);
                     double double_6 = Math.max(1.0D, double_5 / (double) (int_2 - int_3));
-                    this.offset(double_4 * double_6, false);
+                    this.offset(deltaY * double_6, false);
                 }
                 target = Mth.clamp(target, 0, getMaxScrollPosition());
                 return true;
@@ -492,16 +495,16 @@ public class DropdownBoxEntry<T> extends TooltipListEntry<T> {
             return false;
         }
         
-        protected void updateScrollingState(double double_1, double double_2, int int_1) {
-            this.scrolling = isExpanded() && lastRectangle != null && int_1 == 0 && double_1 >= (double) lastRectangle.x + getCellCreator().getCellWidth() - 6 && double_1 < (double) (lastRectangle.x + getCellCreator().getCellWidth());
+        protected void updateScrollingState(MouseButtonEvent mouseButtonEvent) {
+            this.scrolling = isExpanded() && lastRectangle != null && mouseButtonEvent.button() == 0 && mouseButtonEvent.x() >= (double) lastRectangle.x + getCellCreator().getCellWidth() - 6 && mouseButtonEvent.x() < (double) (lastRectangle.x + getCellCreator().getCellWidth());
         }
         
         @Override
-        public boolean mouseClicked(double double_1, double double_2, int int_1) {
+        public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
             if (!isExpanded())
                 return false;
-            updateScrollingState(double_1, double_2, int_1);
-            return super.mouseClicked(double_1, double_2, int_1) || scrolling;
+            updateScrollingState(mouseButtonEvent);
+            return super.mouseClicked(mouseButtonEvent, bl) || scrolling;
         }
         
         public void offset(double value, boolean animated) {
@@ -642,8 +645,8 @@ public class DropdownBoxEntry<T> extends TooltipListEntry<T> {
         }
         
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int int_1) {
-            boolean b = rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
+        public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
+            boolean b = rendering && mouseButtonEvent.x() >= x && mouseButtonEvent.x() <= x + width && mouseButtonEvent.y() >= y && mouseButtonEvent.y() <= y + height;
             if (b) {
                 getEntry().selectionElement.topRenderer.setValue(r);
                 getEntry().selectionElement.setFocused(null);
@@ -738,17 +741,17 @@ public class DropdownBoxEntry<T> extends TooltipListEntry<T> {
                 }
                 
                 @Override
-                public boolean keyPressed(int int_1, int int_2, int int_3) {
-                    if (int_1 == 257 || int_1 == 335) {
+                public boolean keyPressed(KeyEvent keyEvent) {
+                    if (keyEvent.key() == 257 || keyEvent.key() == 335) {
                         DefaultSelectionTopCellElement.this.selectFirstRecommendation();
                         return true;
                     }
-                    return isSuggestionMode() && super.keyPressed(int_1, int_2, int_3);
+                    return isSuggestionMode() && super.keyPressed(keyEvent);
                 }
                 
                 @Override
-                public boolean charTyped(char chr, int keyCode) {
-                    return isSuggestionMode() && super.charTyped(chr, keyCode);
+                public boolean charTyped(CharacterEvent characterEvent) {
+                    return isSuggestionMode() && super.charTyped(characterEvent);
                 }
             };
             textFieldWidget.setBordered(false);

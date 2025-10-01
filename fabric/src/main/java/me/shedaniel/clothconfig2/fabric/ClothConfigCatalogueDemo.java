@@ -24,11 +24,12 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.example.ExampleConfig;
 import me.shedaniel.clothconfig2.ClothConfigDemo;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 
 public class ClothConfigCatalogueDemo {
     public static Screen createConfigScreen(Screen currentScreen, ModContainer container) {
-        if (RenderSystem.isOnRenderThread() && Screen.hasShiftDown()) return AutoConfig.getConfigScreen(ExampleConfig.class, currentScreen).get();
+        if (RenderSystem.isOnRenderThread() && Minecraft.getInstance().hasShiftDown()) return AutoConfig.getConfigScreen(ExampleConfig.class, currentScreen).get();
         return ClothConfigDemo.getConfigBuilderWithDemo().setParentScreen(currentScreen).build();
     }
 }
